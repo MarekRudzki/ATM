@@ -19,37 +19,70 @@ class HomePage extends StatelessWidget {
           title: const Text(
             'Bankomat',
           ),
-          backgroundColor: const Color.fromARGB(255, 49, 189, 232),
+          backgroundColor: Theme.of(context).colorScheme.primary,
           centerTitle: true,
         ),
+        backgroundColor: Theme.of(context).colorScheme.secondary,
         body: SizedBox(
           width: double.infinity,
-          child: Column(
-            children: [
-              SizedBox(
-                height: MediaQuery.sizeOf(context).height * 0.07,
-              ),
-              const Text(
-                'Dostępne środki',
-                style: TextStyle(
-                  fontSize: 20,
-                  color: Color.fromARGB(255, 158, 156, 156),
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                SizedBox(
+                  height: MediaQuery.sizeOf(context).height * 0.04,
                 ),
-              ),
-              const SizedBox(height: 15),
-              Consumer<AtmProvider>(
-                builder: (context, atmProvider, child) => Text(
-                  '${atmProvider.balance} PLN',
-                  style: const TextStyle(
-                    fontSize: 20,
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
+                  decoration: BoxDecoration(
+                    color: const Color.fromARGB(255, 230, 233, 238),
+                    borderRadius: const BorderRadius.all(
+                      Radius.circular(20),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        offset: const Offset(10, 10),
+                        color: const Color.fromARGB(255, 77, 112, 166)
+                            .withOpacity(0.25),
+                        blurRadius: 36,
+                      ),
+                      const BoxShadow(
+                        offset: Offset(-10, -10),
+                        color: Color.fromARGB(170, 255, 255, 255),
+                        blurRadius: 10,
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      Text(
+                        'Dostępne środki',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.primary,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Consumer<AtmProvider>(
+                        builder: (context, atmProvider, child) => Text(
+                          '${atmProvider.balance} PLN',
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.primary,
+                            fontSize: 23,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ),
-              SizedBox(
-                height: MediaQuery.sizeOf(context).height * 0.07,
-              ),
-              const CashWithdraw(),
-            ],
+                SizedBox(
+                  height: MediaQuery.sizeOf(context).height * 0.04,
+                ),
+                const CashWithdraw(),
+              ],
+            ),
           ),
         ),
       ),

@@ -12,10 +12,10 @@ class CashWithdraw extends StatefulWidget {
   const CashWithdraw({super.key});
 
   @override
-  State<CashWithdraw> createState() => _CashWithdrawState();
+  State<CashWithdraw> createState() => CashWithdrawState();
 }
 
-class _CashWithdrawState extends State<CashWithdraw> {
+class CashWithdrawState extends State<CashWithdraw> {
   late TextEditingController _controller;
 
   @override
@@ -52,15 +52,14 @@ class _CashWithdrawState extends State<CashWithdraw> {
     return true;
   }
 
-  String? _validateInput(String? value, AtmProvider atmProvider) {
+  String? validateInput(String? value, AtmProvider atmProvider) {
     if (value == null || value.isEmpty) {
       return 'Nie podano kwoty';
+    } else if (value == '0' || value.startsWith('0')) {
+      return 'Podaj kwotę większą niż 0';
     } else if (value.startsWith('-')) {
       return 'Podaj liczbę dodatnią';
-    } else if (value.contains(',') ||
-        value.contains('.') ||
-        value.contains(' ') ||
-        value.contains('-')) {
+    } else if (!RegExp(r'^[0-9]+$').hasMatch(value)) {
       return 'Podaj liczbę całkowitą';
     } else if (int.parse(value) > atmProvider.balance) {
       return 'Brak wystarczających środków';
@@ -81,47 +80,87 @@ class _CashWithdrawState extends State<CashWithdraw> {
 
     return Column(
       children: [
-        const Text(
-          'Podaj kwotę do wypłacenia',
-          style: TextStyle(
-            fontSize: 20,
-            color: Color.fromARGB(255, 158, 156, 156),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
+          decoration: BoxDecoration(
+            color: const Color.fromARGB(255, 230, 233, 238),
+            borderRadius: const BorderRadius.all(
+              Radius.circular(20),
+            ),
+            boxShadow: [
+              BoxShadow(
+                offset: const Offset(10, 10),
+                color:
+                    const Color.fromARGB(255, 77, 112, 166).withOpacity(0.25),
+                blurRadius: 36,
+              ),
+              const BoxShadow(
+                offset: Offset(-10, -10),
+                color: Color.fromARGB(170, 255, 255, 255),
+                blurRadius: 10,
+              ),
+            ],
           ),
-        ),
-        const SizedBox(height: 10),
-        SizedBox(
-          width: MediaQuery.sizeOf(context).width * 0.5,
-          child: Form(
-            key: formKey,
-            child: Consumer<AtmProvider>(
-              builder: (context, atmProvider, child) => TextFormField(
-                controller: _controller,
-                keyboardType: TextInputType.number,
-                textAlign: TextAlign.center,
-                decoration: const InputDecoration(
-                  hintText: 'Wprowadź kwotę',
-                  hintStyle: TextStyle(
-                    color: Colors.grey,
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(
-                      color: Colors.grey,
-                      width: 2.0,
-                    ),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(
-                      color: Colors.grey,
-                      width: 2.0,
+          child: Column(
+            children: [
+              Text(
+                'Podaj kwotę do wypłacenia',
+                style: TextStyle(
+                  fontSize: 18,
+                  color: Theme.of(context).colorScheme.primary,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 10),
+              SizedBox(
+                width: MediaQuery.sizeOf(context).width * 0.5,
+                child: Form(
+                  key: formKey,
+                  child: Consumer<AtmProvider>(
+                    builder: (context, atmProvider, child) => TextFormField(
+                      controller: _controller,
+                      keyboardType: TextInputType.number,
+                      textAlign: TextAlign.center,
+                      decoration: InputDecoration(
+                        hintText: 'Wprowadź kwotę',
+                        errorMaxLines: 2,
+                        hintStyle: const TextStyle(
+                          color: Colors.grey,
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(
+                            color: Theme.of(context).colorScheme.primary,
+                            width: 2.0,
+                          ),
+                        ),
+                        focusedErrorBorder: OutlineInputBorder(
+                          borderSide: BorderSide(
+                            color: Theme.of(context).colorScheme.primary,
+                            width: 2.0,
+                          ),
+                        ),
+                        errorBorder: OutlineInputBorder(
+                          borderSide: BorderSide(
+                            color: Theme.of(context).colorScheme.primary,
+                            width: 2.0,
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(
+                            color: Theme.of(context).colorScheme.primary,
+                            width: 2.0,
+                          ),
+                        ),
+                      ),
+                      validator: (value) => validateInput(value, atmProvider),
                     ),
                   ),
                 ),
-                validator: (value) => _validateInput(value, atmProvider),
               ),
-            ),
+            ],
           ),
         ),
-        const SizedBox(height: 15),
+        const SizedBox(height: 25),
         WithdrawButton(
           controller: _controller,
           formKey: formKey,

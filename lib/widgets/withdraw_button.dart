@@ -18,29 +18,28 @@ class WithdrawButton extends StatelessWidget {
     required this.formKey,
   });
 
+  Map<int, int> calculateWithdraw({
+    required int amount,
+    required AtmProvider provider,
+  }) {
+    final List<int> denominations = [200, 100, 50, 20, 10];
+    final Map<int, int> banknotesUsed = {200: 0, 100: 0, 50: 0, 20: 0, 10: 0};
+
+    for (int i = 0; amount != 0; i++) {
+      int billCount = provider.availableBills[denominations[i]]!;
+
+      while (billCount > 0 && amount >= denominations[i]) {
+        amount -= denominations[i];
+        provider.decreaseAvailableBills(denomination: denominations[i]);
+        banknotesUsed[denominations[i]] = banknotesUsed[denominations[i]]! + 1;
+        billCount -= 1;
+      }
+    }
+    return banknotesUsed;
+  }
+
   @override
   Widget build(BuildContext context) {
-    Map<int, int> calculateWithdraw({
-      required int amount,
-      required AtmProvider provider,
-    }) {
-      final List<int> denominations = [200, 100, 50, 20, 10];
-      final Map<int, int> banknotesUsed = {200: 0, 100: 0, 50: 0, 20: 0, 10: 0};
-
-      for (int i = 0; amount != 0; i++) {
-        int billCount = provider.availableBills[denominations[i]]!;
-
-        while (billCount > 0 && amount >= denominations[i]) {
-          amount -= denominations[i];
-          provider.decreaseAvailableBills(denomination: denominations[i]);
-          banknotesUsed[denominations[i]] =
-              banknotesUsed[denominations[i]]! + 1;
-          billCount -= 1;
-        }
-      }
-      return banknotesUsed;
-    }
-
     return Consumer<AtmProvider>(
       builder: (context, atmProvider, child) => ElevatedButton(
         onPressed: () {
@@ -59,7 +58,7 @@ class WithdrawButton extends StatelessWidget {
               context: context,
               builder: (context) {
                 return SummaryDialog(
-                  withdrawnedMoney: controller.text,
+                  withdrawMoney: controller.text,
                   billsUsed: atmProvider.billsUsed,
                 );
               },
@@ -69,6 +68,9 @@ class WithdrawButton extends StatelessWidget {
           }
         },
         style: ButtonStyle(
+          backgroundColor: MaterialStatePropertyAll(
+            Theme.of(context).colorScheme.primary,
+          ),
           shape: MaterialStateProperty.all(
             RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(18.0),
@@ -77,8 +79,8 @@ class WithdrawButton extends StatelessWidget {
         ),
         child: const Padding(
           padding: EdgeInsets.symmetric(
-            horizontal: 20,
-            vertical: 10,
+            horizontal: 26,
+            vertical: 12,
           ),
           child: Text(
             'Wypłać',

@@ -2,12 +2,12 @@
 import 'package:flutter/material.dart';
 
 class SummaryDialog extends StatelessWidget {
-  final String withdrawnedMoney;
+  final String withdrawMoney;
   final Map<int, int> billsUsed;
 
   const SummaryDialog({
     super.key,
-    required this.withdrawnedMoney,
+    required this.withdrawMoney,
     required this.billsUsed,
   });
 
@@ -17,9 +17,15 @@ class SummaryDialog extends StatelessWidget {
 
     return AlertDialog(
       contentPadding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
-      title: const Text(
+      backgroundColor: Theme.of(context).colorScheme.secondary,
+      title: Text(
         'Transakcja zatwierdzona',
         textAlign: TextAlign.center,
+        style: TextStyle(
+          color: Theme.of(context).colorScheme.primary,
+          fontWeight: FontWeight.bold,
+          fontSize: 18,
+        ),
       ),
       actions: [
         Center(
@@ -30,6 +36,7 @@ class SummaryDialog extends StatelessWidget {
             icon: const Icon(
               Icons.check,
               color: Colors.green,
+              size: 30,
             ),
           ),
         ),
@@ -38,8 +45,12 @@ class SummaryDialog extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            'Wypłacono $withdrawnedMoney PLN w następujących nominałach:',
+            'Wypłacono $withdrawMoney PLN w następujących nominałach:',
             textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.primary,
+              fontWeight: FontWeight.w500,
+            ),
           ),
           const SizedBox(height: 10),
           Column(
@@ -49,17 +60,36 @@ class SummaryDialog extends StatelessWidget {
               final String text = '$denomination PLN - $count sztuk';
 
               if (suffixNumbers.contains(count)) {
-                return Text('${text}i');
+                return MoneyDispenseText(text: '${text}i');
               } else if (count > 4) {
-                return Text(text);
+                return MoneyDispenseText(text: text);
               } else if (count > 0) {
-                return Text('${text}a');
+                return MoneyDispenseText(text: '${text}a');
               } else {
                 return const SizedBox.shrink();
               }
             }).toList(),
           )
         ],
+      ),
+    );
+  }
+}
+
+class MoneyDispenseText extends StatelessWidget {
+  final String text;
+
+  const MoneyDispenseText({
+    super.key,
+    required this.text,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text,
+      style: TextStyle(
+        color: Theme.of(context).colorScheme.primary,
       ),
     );
   }

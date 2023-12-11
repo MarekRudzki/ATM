@@ -30,50 +30,6 @@ class CashWithdrawState extends State<CashWithdraw> {
     super.dispose();
   }
 
-  bool canWithdraw(
-      {required int amount, required Map<int, int> availableBills}) {
-    final List<int> denominations = [200, 100, 50, 20, 10];
-    final Map<int, int> availableBanknotes = availableBills;
-
-    try {
-      for (int i = 0; amount != 0; i++) {
-        int billCount = availableBanknotes[denominations[i]]!;
-        while (billCount > 0 && amount >= denominations[i]) {
-          amount -= denominations[i];
-          billCount -= 1;
-        }
-      }
-    } catch (e) {
-      if (e is RangeError) {
-        return false;
-      }
-    }
-
-    return true;
-  }
-
-  String? validateInput(String? value, AtmProvider atmProvider) {
-    if (value == null || value.isEmpty) {
-      return 'Nie podano kwoty';
-    } else if (value == '0' || value.startsWith('0')) {
-      return 'Podaj kwotę większą niż 0';
-    } else if (value.startsWith('-')) {
-      return 'Podaj liczbę dodatnią';
-    } else if (!RegExp(r'^[0-9]+$').hasMatch(value)) {
-      return 'Podaj liczbę całkowitą';
-    } else if (int.parse(value) > atmProvider.balance) {
-      return 'Brak wystarczających środków';
-    } else if (int.parse(value) % 10 != 0) {
-      return 'Kwota niezgodna z nominałami';
-    } else if (!canWithdraw(
-      amount: int.parse(value),
-      availableBills: atmProvider.availableBills,
-    )) {
-      return 'Brak odpowiednich banknotów';
-    }
-    return null;
-  }
-
   @override
   Widget build(BuildContext context) {
     final formKey = GlobalKey<FormState>();
@@ -152,7 +108,7 @@ class CashWithdrawState extends State<CashWithdraw> {
                           ),
                         ),
                       ),
-                      validator: (value) => validateInput(value, atmProvider),
+                      validator: (value) => atmProvider.validateInput(value),
                     ),
                   ),
                 ),

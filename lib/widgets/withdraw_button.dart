@@ -18,41 +18,18 @@ class WithdrawButton extends StatelessWidget {
     required this.formKey,
   });
 
-  Map<int, int> calculateWithdraw({
-    required int amount,
-    required AtmProvider provider,
-  }) {
-    final List<int> denominations = [200, 100, 50, 20, 10];
-    final Map<int, int> banknotesUsed = {200: 0, 100: 0, 50: 0, 20: 0, 10: 0};
-
-    for (int i = 0; amount != 0; i++) {
-      int billCount = provider.availableBills[denominations[i]]!;
-
-      while (billCount > 0 && amount >= denominations[i]) {
-        amount -= denominations[i];
-        provider.decreaseAvailableBills(denomination: denominations[i]);
-        banknotesUsed[denominations[i]] = banknotesUsed[denominations[i]]! + 1;
-        billCount -= 1;
-      }
-    }
-    return banknotesUsed;
-  }
-
   @override
   Widget build(BuildContext context) {
     return Consumer<AtmProvider>(
       builder: (context, atmProvider, child) => ElevatedButton(
-        onPressed: () {
+        onPressed: () async {
           FocusScope.of(context).unfocus();
           if (formKey.currentState!.validate()) {
-            final int withdrawAmount = int.parse(controller.text);
-            final Map<int, int> banknotesUsed = calculateWithdraw(
-              amount: withdrawAmount,
-              provider: atmProvider,
+            await atmProvider.calculateWithdraw(
+              amount: int.parse(controller.text),
             );
 
-            atmProvider.updateBillCount(banknotesUsed: banknotesUsed);
-            atmProvider.decreaseBalance(amount: withdrawAmount);
+            if (!context.mounted) return;
 
             showDialog(
               context: context,
@@ -77,16 +54,20 @@ class WithdrawButton extends StatelessWidget {
             ),
           ),
         ),
-        child: const Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: 26,
-            vertical: 12,
-          ),
-          child: Text(
-            'Wypłać',
-            style: TextStyle(
-              fontSize: 17,
-            ),
+        child: SizedBox(
+          height: 50,
+          width: 100,
+          child: Align(
+            child: atmProvider.isWithdrawLoading
+                ? CircularProgressIndicator(
+                    color: Theme.of(context).colorScheme.secondary,
+                  )
+                : const Text(
+                    'Wypłać',
+                    style: TextStyle(
+                      fontSize: 17,
+                    ),
+                  ),
           ),
         ),
       ),
